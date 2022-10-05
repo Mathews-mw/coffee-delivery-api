@@ -15,7 +15,6 @@
 ## Some importants libs on this project:
 
 - (Express)[https://expressjs.com/];
-- Prettier[https://prettier.io/];
 - Uuid (v4)[https://www.npmjs.com/package/uuid];
 - Multer[https://www.npmjs.com/package/multer];
 
