@@ -25,7 +25,7 @@ class UserUseCase {
     this.userRepository.create({ name, email, password, confirmPassword });
   }
 
-  executeListAllUsers(email) {
+  executeListAllUsers(email): User[] {
     const allUsers = this.userRepository.getAllUsers()
 
     const user = this.userRepository.findByEmail(email)
