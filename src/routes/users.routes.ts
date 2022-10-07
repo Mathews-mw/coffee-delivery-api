@@ -11,12 +11,12 @@ usersRoutes.get("/", (request, response) => {
   userController.handleListAllUsers(request, response)
 });
 
-usersRoutes.get("/:email", (request, response) => {
-  userController.handleFindByEmail(request, response)
+usersRoutes.get("/:cpf", (request, response) => {
+  userController.handleFindByCPF(request, response)
 })
 
 usersRoutes.post("/", (request, response) => {
-  userController.handle(request, response)
+  userController.handleCreate(request, response)
 });
 
 usersRoutes.put("/:id", (request, response) => {

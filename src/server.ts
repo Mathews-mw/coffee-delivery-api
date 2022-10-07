@@ -1,6 +1,9 @@
 import cors from 'cors';
 import express from 'express';
 import { router } from './routes';
+import { createConnection } from './database/data-source';
+
+createConnection('database_coffee_delivery');
 
 const app = express();
 

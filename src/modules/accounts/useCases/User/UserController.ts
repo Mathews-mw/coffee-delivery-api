@@ -5,51 +5,49 @@ class UserController {
 
   constructor(private userCase: UserUseCase) { }
 
-  handle(request: Request, response: Response): Response {
-    const { name, email, password, confirmPassword } = request.body
+  async handleCreate(request: Request, response: Response): Promise<Response> {
+    const { name, email, phone_number, cpf, password, confirm_password, avatar } = request.body
 
-    this.userCase.execute({ name, email, password, confirmPassword })
-    return response.send()
+    await this.userCase.executeCreate({ name, email, phone_number, cpf, password, confirm_password, avatar });
+
+    return response.json({ message: "Usuário criado com sucesso!" });
   }
 
-  handleListAllUsers(request: Request, response: Response): Response {
-    const { email } = request.headers
-    const users = this.userCase.executeListAllUsers(email)
-
-    if (!users) {
-      response.json({ message: "Usuário não encontrado na base de dados" })
-    }
+  async handleListAllUsers(request: Request, response: Response): Promise<Response> {
+    const { cpf } = request.headers
+    const users = await this.userCase.executeListAllUsers(cpf);
 
     return response.json(users);
   }
 
-  handleFindByEmail(request: Request, response: Response): Response {
-    const { email } = request.params
+  async handleFindByCPF(request: Request, response: Response): Promise<Response> {
+    const { cpf } = request.params
 
-    const user = this.userCase.executeFindByEmail(email);
+    const user = await this.userCase.executeFindByCPF(cpf);
     if (!user) {
       return response.json({ message: "erro ao tentar encontrar usuário!" })
     }
 
-    return response.json(user)
+    return response.json(user);
   }
 
-  handleUpdateUser(request: Request, response: Response): Response {
+  async handleUpdateUser(request: Request, response: Response): Promise<Response> {
     const { id } = request.params;
-    const { name, email } = request.body;
+    const { name, email, phone_number } = request.body;
+    console.log(id)
 
-    this.userCase.executeUpdateUser({ id, name, email });
+    await this.userCase.executeUpdateUser({ id, name, email, phone_number });
 
     return response.json({ message: "User sucess updated!" });
   }
 
-  handleUpdateUserAvatar(request: Request, response: Response): Response {
+  async handleUpdateUserAvatar(request: Request, response: Response): Promise<Response> {
     const { id } = request.params;
     const avatar_file = request.file.filename;
 
-    this.userCase.executeUpdateUseravatar(id, avatar_file)
+    await this.userCase.executeUpdateUseravatar(id, avatar_file)
 
-    return response.status(204).send();
+    return response.status(204).json({ message: "User avatar sucess updated!" });
   }
 }
 

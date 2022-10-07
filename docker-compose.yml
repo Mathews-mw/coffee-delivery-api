@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  database_coffee_delivery:
+    image: postgres
+    container_name: database_coffee_delivery
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=Coffee@2490195
+      - POSTGRES_DB=coffee_delivery
+    volumes:
+      - pgdata:/data/postgres
+
+  app:
+    build: .
+    container_name: coffee-delivery
+    ports:
+      - 3838:3838
+    volumes:
+      - .:/usr/app
+    links:
+      - database_coffee_delivery
+    depends_on:
+      - database_coffee_delivery
+volumes:
+  pgdata:
+    driver: local

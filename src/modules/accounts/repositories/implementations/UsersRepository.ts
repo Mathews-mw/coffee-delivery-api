@@ -1,72 +1,86 @@
+import { Repository } from 'typeorm';
+import { hash } from 'bcryptjs';
+import AppDataSource from '../../../../database/data-source';
 import { User } from "../../entities/User";
 import { ICreateUserDTO, IUserRepository } from "../IUserRepository";
 
 class UserRepository implements IUserRepository {
 
-  private users: User[];
-
-  private static INSTANCE: UserRepository;
+  private repository: Repository<User>;
 
   constructor() {
-    this.users = [];
+    this.repository = AppDataSource.getRepository(User);
   }
 
-  public static getInstance(): IUserRepository {
-    if (!this.INSTANCE) {
-      UserRepository.INSTANCE = new UserRepository()
-    }
+  async create(data: ICreateUserDTO): Promise<void> {
+    const { name, phone_number, email, cpf, password, confirm_password, avatar } = data;
 
-    return UserRepository.INSTANCE;
-  }
+    const hashPassword = await hash(password, 8);
+    const hashConfirmPassword = await hash(confirm_password, 8);
 
-  create(data: ICreateUserDTO): void {
-    const { name, password, email, confirmPassword, avatar } = data;
-
-    const user = new User()
-
-    Object.assign(user, {
+    const newUser = this.repository.create({
       name,
       email,
-      password,
-      isAdmin: false,
-      confirmPassword,
+      phone_number,
+      cpf,
+      password: hashPassword,
+      confirm_password: hashConfirmPassword,
       avatar,
+      isAdmin: false,
       created_at: new Date(),
       updated_at: new Date(),
-    });
+    })
 
-    this.users.push(user);
+    await this.repository.save(newUser);
   };
 
-  findByEmail(email: string): User {
-    const user = this.users.find(user => user.email === email);
+  async findByCPF(cpf: string): Promise<User> {
 
-    return user
+    const user = await this.repository.findOneBy({ cpf });
+
+    return user;
   };
 
-  findByID(id: string): User {
-    const user = this.users.find(user => user.id === id);
+  async findByID(id: string): Promise<User> {
 
-    return user
+    const user = await this.repository.findOneBy({ id });
+
+    return user;
+  };
+
+  async findByEmail(email: string): Promise<User> {
+
+    const user = await this.repository.findOneBy({ email });
+
+    return user;
   }
 
-  updateUser(recivedUser: User, { name, email }): User {
-    recivedUser.name = name;
-    recivedUser.avatar = email;
-    recivedUser.updated_at = new Date();
+  async updateUser({ id, name, email, phone_number }): Promise<void> {
 
-    return null;
+    console.log(id)
+    await this.repository.createQueryBuilder()
+      .update(User).set({
+        name: name,
+        email: email,
+        phone_number: phone_number,
+        updated_at: new Date()
+      })
+      .where("id = :id", { id: id })
+      .execute()
+      .finally();
+
+    return;
   };
 
-  UpdateUserAvatar(recivedUser: User, avatar_file: string): User {
+  async UpdateUserAvatar(recivedUser: User, avatar_file: string): Promise<void> {
     recivedUser.avatar = avatar_file;
     recivedUser.updated_at = new Date();
 
-    return
+    return;
   }
 
-  getAllUsers(): User[] {
-    const users = this.users;
+  async getAllUsers(): Promise<User[]> {
+    const users = await this.repository.find();
 
     return users
   }
