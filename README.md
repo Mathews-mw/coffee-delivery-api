@@ -1,8 +1,8 @@
 # Coffee Delivery API
 
- > This is an additional aplication to serve API Coffee Delivery
+> This is an additional aplication to serve API Coffee Delivery
 
-*This is for study purpose only, as always.*
+_This is for study purpose only, as always._
 
 ## Some importants points about this project:
 
@@ -18,7 +18,6 @@
 - Uuid (v4)[https://www.npmjs.com/package/uuid];
 - Multer[https://www.npmjs.com/package/multer];
 
-
-***
+---
 
 **That is it! Thanks!**

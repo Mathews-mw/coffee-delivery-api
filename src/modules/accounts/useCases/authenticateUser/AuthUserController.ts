@@ -1,16 +1,17 @@
-import { Request, Response } from "express";
-import { AuthUserUseCase } from "./AuthUserUSeCase";
+import chalk from 'chalk';
+import { Request, Response } from 'express';
+import { AuthUserUseCase } from './AuthUserUSeCase';
 
 class AuthUserController {
-  constructor(private userUseCase: AuthUserUseCase) { }
+	constructor(private authUserUseCase: AuthUserUseCase) {}
 
-  async handle(request: Request, response: Response): Promise<Response> {
-    const { email, password } = request.body;
+	async handle(request: Request, response: Response): Promise<Response> {
+		const { email, password } = request.body;
 
-    const token = await this.userUseCase.execute({ email, password });
+		const token = await this.authUserUseCase.execute({ email, password });
 
-    return response.json(token);
-  }
-};
+		return response.status(200).json(token);
+	}
+}
 
 export { AuthUserController };

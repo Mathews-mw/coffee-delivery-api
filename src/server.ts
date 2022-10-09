@@ -12,8 +12,8 @@ app.use(express.json());
 const port = '3838';
 
 app.use(cors());
-app.use(router)
+app.use(router);
 
 app.listen(port, () => {
-  console.log(`Server is on and listen on port ${port}`);
-})
+	console.log(`Server is on and listen on port ${port}`);
+});
