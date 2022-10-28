@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { authUserController } from '../modules/accounts/useCases/authenticateUser';
+import { AuthUserController } from '../modules/core/controllers/AuthUserController';
 
 const authRoutes = Router();
 
-authRoutes.post('/login', (request, response) => {
-	authUserController.handle(request, response);
-});
+const authUserController = new AuthUserController();
+
+authRoutes.post('/login', authUserController.handle);
 
 export { authRoutes };

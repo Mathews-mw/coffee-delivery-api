@@ -1,7 +1,10 @@
-import { deleteFile } from '../../../../utils/fileManager';
+import { deleteFile } from '../../../utils/fileManager';
 import chalk from 'chalk';
 import { User } from '../../entities/User';
 import { IUserRepository } from '../../repositories/IUserRepository';
+import { injectable, inject } from 'tsyringe';
+import { UserRepository } from '../../repositories/implementations/UsersRepository';
+import { HandleErrors } from '../../../shared/errors/HandleErrors';
 
 interface IRequest {
 	name: string;
@@ -20,23 +23,19 @@ interface IUpdateRequest {
 	phone_number: string;
 }
 
+@injectable()
 class UserUseCase {
-	constructor(private userRepository: IUserRepository) {}
+	constructor(
+		@inject(UserRepository)
+		private userRepository: IUserRepository
+	) {}
 
 	async executeCreate(data: IRequest): Promise<void> {
-		const {
-			name,
-			email,
-			phone_number,
-			cpf,
-			password,
-			confirm_password,
-			avatar,
-		} = data;
+		const { name, email, phone_number, cpf, password, confirm_password, avatar } = data;
 
 		const userAlreadyExists = await this.userRepository.findByCPF(cpf);
 		if (userAlreadyExists) {
-			throw new Error(chalk.bgYellow('User Already exists!'));
+			throw new Error('User Already exists!');
 		}
 
 		await this.userRepository.create({
@@ -50,36 +49,32 @@ class UserUseCase {
 		});
 	}
 
-	async executeListAllUsers(cpf): Promise<User[]> {
-		const user = await this.userRepository.findByCPF(cpf);
+	async executeListAllUsers(): Promise<User[]> {
+		try {
+			const allUsers = await this.userRepository.getAllUsers();
 
-		if (!user) {
-			throw new Error(chalk.bgYellow('Usuário não existe na base de dados'));
+			return allUsers;
+		} catch (error) {
+			throw new HandleErrors('Token Invalid!');
 		}
-
-		const allUsers = await this.userRepository.getAllUsers();
-
-		return allUsers;
 	}
 
 	async executeFindByCPF(cpf: string): Promise<User> {
 		const user = this.userRepository.findByCPF(cpf);
 
 		if (!user) {
-			throw new Error(chalk.bgYellow('User not found!'));
+			throw new HandleErrors('User not found!');
 		}
 
 		return user;
 	}
 
-	async executeUpdateUser({
-		id,
-		name,
-		email,
-		phone_number,
-	}: IUpdateRequest): Promise<void> {
-		const user = await this.userRepository.findByID(id);
+	async executeUpdateUser({ id, name, email, phone_number }: IUpdateRequest): Promise<void> {
+		const idNumber = Number(id);
+		const user = await this.userRepository.findByID(idNumber);
+
 		if (!user) {
+			console.log('erro!');
 			throw new Error(chalk.bgYellow('User not found!'));
 		}
 
@@ -88,11 +83,9 @@ class UserUseCase {
 		return;
 	}
 
-	async executeUpdateUseravatar(
-		id: string,
-		avatar_file: string
-	): Promise<void> {
-		const user = await this.userRepository.findByID(id);
+	async executeUpdateUseravatar(id: string, avatar_file: string): Promise<void> {
+		const idNumber = Number(id);
+		const user = await this.userRepository.findByID(idNumber);
 
 		if (!user) {
 			throw new Error(chalk.bgYellow('User not found!'));

@@ -1,7 +1,8 @@
-import { IUserRepository } from '../../repositories/IUserRepository';
-import { compare } from 'bcryptjs';
+import { inject, injectable } from 'tsyringe';
 import { sign } from 'jsonwebtoken';
-import chalk from 'chalk';
+import { compare } from 'bcryptjs';
+import { IUserRepository } from '../../repositories/IUserRepository';
+import { UserRepository } from '../../repositories/implementations/UsersRepository';
 
 interface IRequest {
 	email: string;
@@ -16,8 +17,12 @@ interface IResponse {
 	};
 }
 
+@injectable()
 class AuthUserUseCase {
-	constructor(private UserRepository: IUserRepository) {}
+	constructor(
+		@inject(UserRepository)
+		private UserRepository: IUserRepository
+	) {}
 
 	async execute({ email, password }: IRequest): Promise<IResponse> {
 		const user = await this.UserRepository.findByEmail(email);
@@ -38,13 +43,11 @@ class AuthUserUseCase {
 		});
 
 		delete user.password;
+		delete user.confirm_password;
 
 		const returnToken = {
 			token: token,
-			user: {
-				name: user.name,
-				password: user.password,
-			},
+			user,
 		};
 
 		return returnToken;

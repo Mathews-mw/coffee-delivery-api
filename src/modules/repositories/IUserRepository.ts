@@ -13,7 +13,7 @@ export interface ICreateUserDTO {
 export interface IUserRepository {
 	create(data: ICreateUserDTO): Promise<void>;
 	findByCPF(cpf: string): Promise<User>;
-	findByID(id: string): Promise<User>;
+	findByID(id: number): Promise<User>;
 	findByEmail(email: string): Promise<User>;
 	getAllUsers(): Promise<User[]>;
 	updateUser({ id, name, email, phone_number }): Promise<void>;
