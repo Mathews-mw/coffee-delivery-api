@@ -7,10 +7,6 @@ import { TagsRepository } from '../../repositories/implementations/TagsRepositor
 import { IProductRepository } from '../../repositories/IProductRepository';
 import { ITagRepository } from '../../repositories/ITagRepository';
 
-interface ITagRequest {
-	tag: string;
-}
-
 interface IRequest {
 	product_name: string;
 	price: string;
@@ -51,9 +47,11 @@ class ProductUseCase {
 			uuid_ref_tag,
 		});
 
-		await convertTagsToArray.map(async (tag) => {
-			await this.tagRepository.create({ tag: tag, uuid_ref_product: uuid_ref_tag });
-		});
+		await Promise.all(
+			convertTagsToArray.map(async (tag) => {
+				await this.tagRepository.create({ tag: tag, uuid_ref_product: uuid_ref_tag });
+			})
+		);
 
 		return product;
 	}

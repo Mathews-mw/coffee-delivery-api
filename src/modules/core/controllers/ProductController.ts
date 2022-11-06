@@ -84,6 +84,7 @@ class ProductController {
 
 		return response.json({
 			content: productsPaginate[0],
+			totalContent: productsPaginate[1],
 			totalPages: totalPages,
 			currentPage: currentPageCount,
 		});

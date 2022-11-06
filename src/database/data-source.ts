@@ -1,8 +1,12 @@
 import 'reflect-metadata';
+
 import { DataSource } from 'typeorm';
-import { Product } from '../modules/entities/Product';
+
 import { Tag } from '../modules/entities/Tag';
 import { User } from '../modules/entities/User';
+import { Order } from '../modules/entities/Order';
+import { Product } from '../modules/entities/Product';
+import { Checkout } from '../modules/entities/Checkout';
 
 const AppDataSource = new DataSource({
 	type: 'postgres',
@@ -13,7 +17,7 @@ const AppDataSource = new DataSource({
 	database: 'coffee_delivery',
 	synchronize: false,
 	logging: false,
-	entities: [User, Product, Tag],
+	entities: [User, Product, Tag, Order, Checkout],
 	migrations: ['./src/database/migrations/*.ts'],
 	subscribers: [],
 });

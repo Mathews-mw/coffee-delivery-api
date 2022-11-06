@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import paginate from 'express-paginate';
+
 import multer from 'multer';
 import uploadConfig from '../config/upload';
+
 import { ensureAuthenticate } from '../middleware/ensureAuthenticate';
-import { ProductController } from '../modules/core/controllers/ProductController';
 import { TagController } from '../modules/core/controllers/TagController';
+import { ProductController } from '../modules/core/controllers/ProductController';
 
 const productsRoutes = Router();
 
@@ -14,7 +15,7 @@ const productsController = new ProductController();
 const tagController = new TagController();
 
 productsRoutes.get('/', productsController.handleListAllProducts);
-productsRoutes.get('/many', productsController.handleGetManyProducts);
+productsRoutes.get('/paginate', productsController.handleGetManyProducts);
 productsRoutes.post('/', ensureAuthenticate, uploadProductImage.single('image_name'), productsController.handleCreate);
 productsRoutes.put('/:ID', ensureAuthenticate, uploadProductImage.single('image_name'), productsController.handleUpdate);
 productsRoutes.delete('/:ID', ensureAuthenticate, productsController.handleDelete);

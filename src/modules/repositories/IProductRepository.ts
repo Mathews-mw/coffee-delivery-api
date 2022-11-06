@@ -1,4 +1,4 @@
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { UpdateResult } from 'typeorm';
 import { Product } from '../entities/Product';
 
 export interface ICreateProductDTO {
