@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
 import { container } from 'tsyringe';
-import chalk from 'chalk';
+import { NextFunction, Request, Response } from 'express';
+
 import { ProductUseCase } from '../useCases/ProductUseCase';
 
 class ProductController {
@@ -42,7 +42,7 @@ class ProductController {
 
 			return response.status(200).json({ message: 'Produto atualizado com sucesso' });
 		} catch (error) {
-			console.log(chalk.red(error));
+			console.log(error);
 			return response.status(400).json({ message: 'Ocorreu algum erro durante a operação' });
 		}
 	}
@@ -88,6 +88,22 @@ class ProductController {
 			totalPages: totalPages,
 			currentPage: currentPageCount,
 		});
+	}
+
+	async handleListByID(request: Request, response: Response): Promise<Response> {
+		const { ID } = request.params;
+
+		const productUseCase = container.resolve(ProductUseCase);
+
+		try {
+			const idFormatted = Number(ID);
+			const product = await productUseCase.executeFindByID(idFormatted);
+
+			return response.json(product);
+		} catch (error) {
+			console.log(error);
+			return response.status(400).json({ message: 'Erro ao tentar listar produto! A requisição tá caindo aqui...' });
+		}
 	}
 }
 

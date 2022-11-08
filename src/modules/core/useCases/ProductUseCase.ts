@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import { inject, injectable } from 'tsyringe';
 import { UpdateResult } from 'typeorm';
 import { Product } from '../../entities/Product';
+import { Tag } from '../../entities/Tag';
 import { ProductsRepository } from '../../repositories/implementations/ProductsRepository';
 import { TagsRepository } from '../../repositories/implementations/TagsRepository';
 import { IProductRepository } from '../../repositories/IProductRepository';
@@ -24,6 +25,18 @@ interface IUpdateRequest {
 	tags: string;
 	image_name: string;
 	uuid_ref_tag: string;
+}
+
+interface IProductView {
+	id: number;
+	product_name: string;
+	price: number;
+	description: string;
+	image_name: string;
+	tags: Tag[];
+	uuid_ref_tag: string;
+	created_at: Date;
+	updated_at?: Date;
 }
 
 @injectable()
@@ -121,6 +134,25 @@ class ProductUseCase {
 		const products = await this.productRopistory.getMany(size, page);
 
 		return products;
+	}
+
+	async executeFindByID(id: number): Promise<IProductView> {
+		const productById = await this.productRopistory.findByID(id);
+		const tags = await this.tagRepository.listTagsByRef(productById.uuid_ref_tag);
+
+		const productView = {
+			id: productById.id,
+			product_name: productById.product_name,
+			price: productById.price,
+			description: productById.description,
+			image_name: productById.image_name,
+			tags: tags,
+			uuid_ref_tag: productById.uuid_ref_tag,
+			created_at: productById.created_at,
+			updated_at: productById.updated_at,
+		};
+
+		return productView;
 	}
 }
 

@@ -6,26 +6,9 @@ import { ICreateTagDTO, ITagRepository, IUpdateCreateTagDTO } from '../ITagRepos
 class TagsRepository implements ITagRepository {
 	private repository: Repository<Tag>;
 
-	private tags: Tag[] = [];
-
 	constructor() {
 		this.repository = AppDataSource.getRepository(Tag);
 	}
-
-	/* async create(data: ICreateTagDTO): Promise<Tag> {
-		const { tag, uuid_ref_product } = data;
-		console.log('tagRepository: ', data);
-
-		const createNewTag = Object.assign({
-			tag,
-			uuid_ref_product,
-		});
-
-		await this.tags.push(createNewTag);
-
-		console.log(this.tags);
-		return createNewTag;
-	} */
 
 	async create(data: ICreateTagDTO): Promise<Tag> {
 		const { tag, uuid_ref_product } = data;
@@ -62,7 +45,6 @@ class TagsRepository implements ITagRepository {
 
 	async listAllTags(): Promise<Tag[]> {
 		const tags = await this.repository.find();
-
 		return tags;
 	}
 

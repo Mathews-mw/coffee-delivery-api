@@ -7,7 +7,6 @@ import { readImageFile } from '../../../utils/fileManager';
 class UserController {
 	async handleCreate(request: Request, response: Response): Promise<Response> {
 		const { name, email, phone_number, cpf, password, confirm_password, avatar } = request.body;
-		console.log(cpf);
 
 		const userUseCase = container.resolve(UserUseCase);
 
@@ -26,7 +25,6 @@ class UserController {
 		} catch (error) {
 			const alredyExists = await userUseCase.executeFindByCPF(cpf);
 			if (alredyExists) {
-				console.log('aqui');
 				return response.status(404).json({ message: 'Usuário já cadastrado!' });
 			}
 			console.log(error);
@@ -37,7 +35,6 @@ class UserController {
 	async handleListAllUsers(request: Request, response: Response): Promise<Response> {
 		const userUseCase = container.resolve(UserUseCase);
 
-		readImageFile();
 		const users = await userUseCase.executeListAllUsers();
 
 		return response.json(users);
@@ -50,7 +47,6 @@ class UserController {
 		try {
 			const user = await userUseCase.executeFindByCPF(cpf);
 
-			console.log(!!user);
 			if (!user) {
 				return response.json({ message: 'nenhum usuário encontrado' });
 			}

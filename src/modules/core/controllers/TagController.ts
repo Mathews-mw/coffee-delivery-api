@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
 import { container } from 'tsyringe';
+import { Request, Response } from 'express';
 import { TagUseCase } from '../useCases/TagUseCase';
 
 class TagController {
@@ -23,6 +23,8 @@ class TagController {
 	}
 
 	async handleListAllTags(request: Request, response: Response): Promise<Response> {
+		console.log('teste de requisição nessa rota');
+
 		const tagUseCase = container.resolve(TagUseCase);
 		const listAlltags = await tagUseCase.executeListAll();
 
