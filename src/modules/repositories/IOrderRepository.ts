@@ -1,3 +1,4 @@
+import { InsertResult } from 'typeorm';
 import { Order } from '../entities/Order';
 
 enum PaymentEnum {
@@ -21,4 +22,5 @@ export interface ICreateOrderDTO {
 
 export interface IOrderRepository {
 	create(data: ICreateOrderDTO): Promise<Order>;
+	indexByUserId(user_id: number): Promise<Order[]>;
 }

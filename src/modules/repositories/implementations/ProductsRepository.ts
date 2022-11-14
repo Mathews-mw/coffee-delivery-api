@@ -28,7 +28,7 @@ class ProductsRepository implements IProductRepository {
 	}
 
 	async edit(data: IUpdateProductDTO): Promise<UpdateResult> {
-		const { id, product_name, price, description, image_name } = data;
+		const { id, product_name, price, description } = data;
 
 		const updateProduct = await this.repository
 			.createQueryBuilder()
@@ -37,7 +37,6 @@ class ProductsRepository implements IProductRepository {
 				product_name: product_name,
 				price: price,
 				description: description,
-				image_name: image_name,
 				updated_at: new Date(),
 			})
 			.where('id = :id', { id: id })
@@ -45,6 +44,21 @@ class ProductsRepository implements IProductRepository {
 
 		return updateProduct;
 	}
+
+  async editImage(ID: number, image_name: string): Promise<UpdateResult> {
+
+		const updateImageProduct = await this.repository
+			.createQueryBuilder()
+			.update(Product)
+			.set({
+        image_name: image_name,
+				updated_at: new Date(),
+			})
+			.where('id = :id', { id: ID })
+			.execute();
+
+		return updateImageProduct;
+  }
 
 	async delete(id: number): Promise<void> {
 		await this.repository.createQueryBuilder().delete().from(Product).where('id = :id', { id: id }).execute();

@@ -19,7 +19,7 @@ class OrdersController {
 				return response.status(404).json({ message: 'Erro no tipo de pagamento' });
 			}
 
-			await ordersUSeCase.executeCreate({
+			const newOrder = await ordersUSeCase.executeCreate({
 				user_id: user.id,
 				cep,
 				rua,
@@ -33,10 +33,31 @@ class OrdersController {
 				total_order,
 			});
 
-			return response.status(201).json({ message: 'Pedido criado com sucesso' });
+			return response.status(201).json({ order: newOrder, message: 'Pedido criado com sucesso' });
 		} catch (error) {
 			console.log(error);
 			return response.status(400).json({ message: 'Erro ao tentar realizar pedido' });
+		}
+	}
+
+	async handleIndexByUserId(request: Request, response: Response): Promise<Response> {
+		const { user_id } = request.params;
+
+		const ordersUseCase = container.resolve(OrdersUseCase);
+
+		try {
+			if (!user_id) {
+				return response.status(400).json({ message: 'Nenhuma ordem de compra encontrada' });
+			}
+
+			const userIdFormatted = Number(user_id);
+
+			const userOrders = await ordersUseCase.executeIndexByUserId(userIdFormatted);
+
+			return response.json(userOrders);
+		} catch (error) {
+			console.log(error);
+			return response.status(404).json({ message: 'Erro ao tentar listar ordens de compra' });
 		}
 	}
 }

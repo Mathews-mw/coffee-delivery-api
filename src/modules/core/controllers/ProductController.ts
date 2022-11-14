@@ -25,7 +25,6 @@ class ProductController {
 	async handleUpdate(request: Request, response: Response): Promise<Response> {
 		const { ID } = request.params;
 		const { product_name, price, description, tags, uuid_ref_tag } = request.body;
-		const image_name = request.file.filename;
 
 		const productUseCase = container.resolve(ProductUseCase);
 
@@ -36,14 +35,33 @@ class ProductController {
 				price,
 				description,
 				tags,
-				image_name,
 				uuid_ref_tag,
 			});
 
 			return response.status(200).json({ message: 'Produto atualizado com sucesso' });
 		} catch (error) {
 			console.log(error);
-			return response.status(400).json({ message: 'Ocorreu algum erro durante a operação' });
+			return response.status(404).json({ message: 'Ocorreu algum erro durante a operação' });
+		}
+	}
+
+	async handleUpdateProductImage(request: Request, response: Response): Promise<Response> {
+		const { ID } = request.params;
+		const image_name = request.file.filename;
+
+		const productUseCase = container.resolve(ProductUseCase);
+		try {
+			if (!ID) {
+				return response.status(400).json({ message: 'Nenhuma imagem atualizada' });
+			}
+
+			const idFormatted = Number(ID);
+			await productUseCase.updateProductImage(idFormatted, image_name);
+
+			return response.status(200).json({ message: 'Imagem atualizada com sucesso' });
+		} catch (error) {
+			console.log(error);
+			return response.status(404).json({ message: 'Algo deu errado, por favor, tente novamente mais tarde' });
 		}
 	}
 

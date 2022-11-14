@@ -58,6 +58,12 @@ class OrdersUseCase {
 
 		return order;
 	}
+
+	async executeIndexByUserId(user_id: number): Promise<Order[]> {
+		const order = await this.orderRespository.indexByUserId(user_id);
+
+		return order;
+	}
 }
 
 export { OrdersUseCase };

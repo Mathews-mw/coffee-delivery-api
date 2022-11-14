@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { User } from './User';
 
-@Entity('orders')
+@Entity('orders', { orderBy: { created_at: 'DESC' } })
 class Order {
 	@PrimaryColumn()
 	id: number;

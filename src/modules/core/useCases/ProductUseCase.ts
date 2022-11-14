@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { inject, injectable } from 'tsyringe';
 import { UpdateResult } from 'typeorm';
+import { deleteFile } from '../../../utils/fileManager';
 import { Product } from '../../entities/Product';
 import { Tag } from '../../entities/Tag';
 import { ProductsRepository } from '../../repositories/implementations/ProductsRepository';
@@ -22,8 +23,7 @@ interface IUpdateRequest {
 	product_name: string;
 	price: string;
 	description: string;
-	tags: string;
-	image_name: string;
+	tags: string[];
 	uuid_ref_tag: string;
 }
 
@@ -70,23 +70,21 @@ class ProductUseCase {
 	}
 
 	async executeUpdate(data: IUpdateRequest): Promise<UpdateResult> {
-		const { id, product_name, price, description, tags, image_name, uuid_ref_tag } = data;
+		const { id, product_name, price, description, tags, uuid_ref_tag } = data;
 
-		const convertTagsToArray = tags.split(',');
 		const priceFormatted = Number(price.replace(',', '.'));
 		const idFormatted = Number(id);
 
 		let currentTagList = await this.tagRepository.listTagsByRef(uuid_ref_tag);
 
-		let tagsToDelete = currentTagList.filter((tag) => convertTagsToArray.filter((item) => tag.tag === item).length === 0);
-		let tagsToAdd = convertTagsToArray.filter((item) => currentTagList.filter((tag) => tag.tag === item).length === 0);
+		let tagsToDelete = currentTagList.filter((tag) => tags.filter((item) => tag.tag === item).length === 0);
+		let tagsToAdd = tags.filter((item) => currentTagList.filter((tag) => tag.tag === item).length === 0);
 
 		const updateProduct = await this.productRopistory.edit({
 			id: idFormatted,
 			product_name,
 			price: priceFormatted,
 			description,
-			image_name,
 		});
 
 		if (tagsToDelete.length > 0) {
@@ -99,13 +97,24 @@ class ProductUseCase {
 
 		if (tagsToAdd.length > 0) {
 			await Promise.all(
-				convertTagsToArray.map(async (tag) => {
+				tags.map(async (tag) => {
 					await this.tagRepository.create({ tag: tag.trim(), uuid_ref_product: uuid_ref_tag });
 				})
 			);
 		}
 
 		return updateProduct;
+	}
+
+	async updateProductImage(ID: number, image_name: string): Promise<UpdateResult> {
+		const product = await this.productRopistory.findByID(ID);
+
+		if (product.image_name) {
+			await deleteFile(`./tmp/productsImages/${product.image_name}`);
+		}
+
+		const updadeProductImage = await this.productRopistory.editImage(ID, image_name);
+		return updadeProductImage;
 	}
 
 	async executeDelete(id: string): Promise<void> {

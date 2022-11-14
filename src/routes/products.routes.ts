@@ -21,7 +21,8 @@ productsRoutes.get('/paginate', productsController.handleGetManyProducts);
 productsRoutes.get('/:ID', productsController.handleListByID);
 productsRoutes.post('/', ensureAuthenticate, uploadProductImage.single('image_name'), productsController.handleCreate);
 productsRoutes.post('/tags', ensureAuthenticate, tagController.handleCreate);
-productsRoutes.put('/:ID', ensureAuthenticate, uploadProductImage.single('image_name'), productsController.handleUpdate);
+productsRoutes.put('/:ID', ensureAuthenticate, productsController.handleUpdate);
+productsRoutes.patch('/image/:ID', ensureAuthenticate, uploadProductImage.single('image_name'), productsController.handleUpdateProductImage);
 productsRoutes.delete('/:ID', ensureAuthenticate, productsController.handleDelete);
 
 export { productsRoutes };

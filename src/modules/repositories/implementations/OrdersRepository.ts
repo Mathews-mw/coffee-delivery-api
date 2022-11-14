@@ -30,6 +30,12 @@ class OrdersRepository implements IOrderRepository {
 
 		return newOrder;
 	}
+
+	async indexByUserId(user_id: number): Promise<Order[]> {
+		const orderByUserId = await this.respository.findBy({ user_id });
+
+		return orderByUserId;
+	}
 }
 
 export { OrdersRepository };
