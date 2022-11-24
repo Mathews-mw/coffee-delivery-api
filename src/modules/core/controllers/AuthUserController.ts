@@ -7,6 +7,7 @@ class AuthUserController {
 		const { email, password } = request.body;
 
 		const authUserUseCase = container.resolve(AuthUserUseCase);
+
 		const token = await authUserUseCase.execute({ email, password });
 
 		return response.status(200).json(token);

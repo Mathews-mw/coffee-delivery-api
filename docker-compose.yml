@@ -16,7 +16,7 @@ services:
 
   app:
     build: .
-    container_name: coffee-delivery
+    container_name: coffee-delivery-api
     ports:
       - 3838:3838
     volumes:

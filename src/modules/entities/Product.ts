@@ -17,14 +17,14 @@ class Product {
 	@Column()
 	image_name: string;
 
+	@Column()
+	uuid_ref_tag: string;
+
 	@CreateDateColumn()
 	created_at: Date;
 
 	@CreateDateColumn()
 	updated_at?: Date;
-
-	@Column()
-	uuid_ref_tag: string;
 }
 
 export { Product };

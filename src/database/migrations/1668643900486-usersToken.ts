@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class productsRegister1666391345588 implements MigrationInterface {
+export class usersToken1668643900486 implements MigrationInterface {
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.createTable(
 			new Table({
-				name: 'products',
+				name: 'users_tokens',
 				columns: [
 					{
 						name: 'id',
@@ -14,35 +14,31 @@ export class productsRegister1666391345588 implements MigrationInterface {
 						generationStrategy: 'increment',
 					},
 					{
-						name: 'product_name',
+						name: 'refresh_token',
 						type: 'varchar',
 					},
 					{
-						name: 'price',
-						type: 'numeric',
+						name: 'user_id',
+						type: 'integer',
 					},
 					{
-						name: 'description',
-						type: 'varchar',
-					},
-					{
-						name: 'image_name',
-						type: 'varchar',
-					},
-					{
-						name: 'uuid_ref_tag',
-						type: 'uuid',
-						isUnique: true,
+						name: 'expires_date',
+						type: 'timestamp',
 					},
 					{
 						name: 'created_at',
 						type: 'timestamp',
 						default: 'now()',
 					},
+				],
+				foreignKeys: [
 					{
-						name: 'updated_at',
-						type: 'Date',
-						isNullable: true,
+						name: 'FKUserToken',
+						referencedTableName: 'users',
+						referencedColumnNames: ['id'],
+						columnNames: ['user_id'],
+						onDelete: 'CASCADE',
+						onUpdate: 'CASCADE',
 					},
 				],
 			})
@@ -50,6 +46,6 @@ export class productsRegister1666391345588 implements MigrationInterface {
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
-		await queryRunner.dropTable('products');
+		await queryRunner.dropTable('users_tokens');
 	}
 }

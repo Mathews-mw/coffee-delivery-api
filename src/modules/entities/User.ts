@@ -24,22 +24,16 @@ class User {
 	confirm_password: string;
 
 	@Column()
-	isAdmin: boolean;
+	avatar: string;
 
 	@Column()
-	avatar: string;
+	isAdmin: boolean;
 
 	@CreateDateColumn()
 	created_at: Date;
 
 	@CreateDateColumn()
 	updated_at?: Date;
-
-	/* constructor() {
-    if (!this.id) {
-      this.id = uuidV4()
-    }
-  } */
 }
 
 export { User };

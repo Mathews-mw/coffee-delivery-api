@@ -14,10 +14,10 @@ class Tag {
 	product: Product;
 
 	@Column()
-	created_at: Date;
+	uuid_ref_product: string;
 
 	@Column()
-	uuid_ref_product: string;
+	created_at: Date;
 }
 
 export { Tag };

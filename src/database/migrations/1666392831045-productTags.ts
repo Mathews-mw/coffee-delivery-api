@@ -18,8 +18,8 @@ export class productTags1666392831045 implements MigrationInterface {
 						type: 'varchar',
 					},
 					{
-						name: 'product_id',
-						type: 'integer',
+						name: 'uuid_ref_product',
+						type: 'uuid',
 					},
 					{
 						name: 'created_at',
@@ -31,8 +31,8 @@ export class productTags1666392831045 implements MigrationInterface {
 					{
 						name: 'FKProductTag',
 						referencedTableName: 'products',
-						referencedColumnNames: ['id'],
-						columnNames: ['product_id'],
+						referencedColumnNames: ['uuid_ref_tag'],
+						columnNames: ['uuid_ref_product'],
 						onDelete: 'CASCADE',
 						onUpdate: 'CASCADE',
 					},
