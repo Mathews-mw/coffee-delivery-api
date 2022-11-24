@@ -50,7 +50,7 @@ class ForgottenUserPasswordUseCase {
 			link: `http://localhost:3838/password/reset?token=${token}`,
 		};
 
-		await this.mailProvider.sendMail();
+		await this.mailProvider.sendMail(email, 'Recuperação de senha', templateVariables, templatePath);
 	}
 }
 

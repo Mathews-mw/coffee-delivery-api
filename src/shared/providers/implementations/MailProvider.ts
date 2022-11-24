@@ -13,12 +13,12 @@ class MailProvider implements IMailProvider {
 			.createTestAccount()
 			.then((account) => {
 				const transporter = nodemailer.createTransport({
-					host: account.smtp.host,
-					port: account.smtp.port,
-					secure: account.smtp.secure,
+					host: 'smtp.gmail.com',
+					port: 465,
+					secure: true,
 					auth: {
-						user: account.user,
-						pass: account.pass,
+						user: 'mathews.mw@gmail.com',
+						pass: 'zoedoiofepvktpcz',
 					},
 				});
 				this.client = transporter;
@@ -40,6 +40,7 @@ class MailProvider implements IMailProvider {
 			from: 'Rentx <noreply@rentx.com.br',
 			subject,
 			html: templateHTML,
+			text: 'Olá, teste de envio de e-mail',
 		});
 
 		console.log('Message sent: %s', message.messageId);
