@@ -20,7 +20,7 @@ const AppDataSource = new DataSource({
 	database: 'coffee_delivery',
 	synchronize: false,
 	logging: false,
-	entities: [User, Product, Tag, Order, Checkout, User, UserTokens, Permission, UserPermissions],
+	entities: [User, Product, Tag, Order, Checkout, UserTokens, Permission, UserPermissions],
 	migrations: ['./src/database/migrations/*.ts', './src/database/migrations/seeds/*.ts'],
 	subscribers: [],
 });
