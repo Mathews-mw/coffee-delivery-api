@@ -18,7 +18,7 @@ interface IResponse {
 	token: string;
 	user: {
 		name: string;
-		password: string;
+		email: string;
 	};
 	refresh_token: string;
 }

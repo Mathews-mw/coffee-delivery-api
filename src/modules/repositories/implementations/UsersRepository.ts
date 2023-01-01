@@ -1,8 +1,10 @@
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { instanceToInstance } from 'class-transformer';
 import { hash } from 'bcryptjs';
 import AppDataSource from '../../../database/data-source';
 import { User } from '../../entities/User';
 import { ICreateUserDTO, IUserRepository } from '../IUserRepository';
+import { format } from 'date-fns';
 
 class UserRepository implements IUserRepository {
 	private repository: Repository<User>;
@@ -33,8 +35,18 @@ class UserRepository implements IUserRepository {
 		await this.repository.save(newUser);
 	}
 
+	async getAllUsers(): Promise<User[]> {
+		const users = await this.repository.find();
+
+		return users;
+	}
+
 	async findByCPF(cpf: string): Promise<User> {
 		const user = await this.repository.findOneBy({ cpf });
+
+		const avatarUrl = user.avatar_url();
+
+		const { name, email, phone_number } = user;
 
 		return user;
 	}
@@ -52,7 +64,6 @@ class UserRepository implements IUserRepository {
 	}
 
 	async updateUser({ id, name, email, phone_number }): Promise<void> {
-		console.log(id);
 		await this.repository
 			.createQueryBuilder()
 			.update(User)
@@ -69,17 +80,19 @@ class UserRepository implements IUserRepository {
 		return;
 	}
 
-	async UpdateUserAvatar(recivedUser: User, avatar_file: string): Promise<void> {
-		recivedUser.avatar = avatar_file;
-		recivedUser.updated_at = new Date();
+	async UpdateUserAvatar(id: number, avatar_file: string): Promise<UpdateResult> {
+		const updateUserAvatar = await this.repository
+			.createQueryBuilder()
+			.update(User)
+			.set({
+				avatar: avatar_file,
+				updated_at: format(new Date(), 'yyyy-MM-dd'),
+			})
+			.where('id = :id', { id })
+			.execute()
+			.finally();
 
-		return;
-	}
-
-	async getAllUsers(): Promise<User[]> {
-		const users = await this.repository.find();
-
-		return users;
+		return updateUserAvatar;
 	}
 }
 

@@ -1,13 +1,15 @@
-import chalk from 'chalk';
-import { inject, injectable } from 'tsyringe';
 import { UpdateResult } from 'typeorm';
-import { deleteFile } from '../../../utils/fileManager';
-import { Product } from '../../entities/Product';
+import { inject, injectable } from 'tsyringe';
+
 import { Tag } from '../../entities/Tag';
-import { ProductsRepository } from '../../repositories/implementations/ProductsRepository';
-import { TagsRepository } from '../../repositories/implementations/TagsRepository';
-import { IProductRepository } from '../../repositories/IProductRepository';
+import { Product } from '../../entities/Product';
 import { ITagRepository } from '../../repositories/ITagRepository';
+import { IProductRepository } from '../../repositories/IProductRepository';
+import { IStorageProvider } from '../../../shared/providers/IStorageProvider';
+import { TagsRepository } from '../../repositories/implementations/TagsRepository';
+import { ProductsRepository } from '../../repositories/implementations/ProductsRepository';
+import { S3StorageProvider } from '../../../shared/providers/implementations/S3StorageProvider';
+import { LocalStorageProvider } from '../../../shared/providers/implementations/LocalStorageProvider';
 
 interface IRequest {
 	product_name: string;
@@ -37,7 +39,13 @@ interface IProductView {
 	uuid_ref_tag: string;
 	created_at: Date;
 	updated_at?: Date;
+	image_url: string;
 }
+
+const diskStorage = {
+	local: LocalStorageProvider,
+	s3: S3StorageProvider,
+};
 
 @injectable()
 class ProductUseCase {
@@ -45,7 +53,9 @@ class ProductUseCase {
 		@inject(ProductsRepository)
 		private productRopistory: IProductRepository,
 		@inject(TagsRepository)
-		private tagRepository: ITagRepository
+		private tagRepository: ITagRepository,
+		@inject(diskStorage[process.env.disk])
+		private storageProvider: IStorageProvider
 	) {}
 
 	async executeCreate({ product_name, price, description, tags, image_name, uuid_ref_tag }: IRequest): Promise<Product> {
@@ -65,6 +75,8 @@ class ProductUseCase {
 				await this.tagRepository.create({ tag: tag, uuid_ref_product: uuid_ref_tag });
 			})
 		);
+
+		await this.storageProvider.save(image_name, 'productsImages');
 
 		return product;
 	}
@@ -110,22 +122,45 @@ class ProductUseCase {
 		const product = await this.productRopistory.findByID(ID);
 
 		if (product.image_name) {
-			await deleteFile(`./tmp/productsImages/${product.image_name}`);
+			await this.storageProvider.delete(product.image_name, 'productsImages');
 		}
 
 		const updadeProductImage = await this.productRopistory.editImage(ID, image_name);
+		await this.storageProvider.save(image_name, 'productsImages');
+
 		return updadeProductImage;
 	}
 
 	async executeDelete(id: string): Promise<void> {
 		const idFormatted = Number(id);
+		const product = await this.productRopistory.findByID(idFormatted);
+
+		if (product.image_name) {
+			await this.storageProvider.delete(product.image_name, 'productsImages');
+		}
+
 		await this.productRopistory.delete(idFormatted);
 	}
 
-	async executeListAll(): Promise<Product[]> {
+	async executeListAll(): Promise<IProductView[]> {
 		const products = await this.productRopistory.getAll();
 
-		return products;
+		const productsView = products.map((product) => {
+			return {
+				id: product.id,
+				product_name: product.product_name,
+				price: product.price,
+				description: product.description,
+				tags: [],
+				image_name: product.image_name,
+				uuid_ref_tag: product.uuid_ref_tag,
+				created_at: product.created_at,
+				updated_at: product.updated_at,
+				image_url: product.getImageUrl(),
+			};
+		});
+
+		return productsView;
 	}
 
 	async executeGetMany(pagesAmount: number, currentPage: number): Promise<any> {
@@ -154,11 +189,12 @@ class ProductUseCase {
 			product_name: productById.product_name,
 			price: productById.price,
 			description: productById.description,
-			image_name: productById.image_name,
 			tags: tags,
+			image_name: productById.image_name,
 			uuid_ref_tag: productById.uuid_ref_tag,
 			created_at: productById.created_at,
 			updated_at: productById.updated_at,
+			image_url: productById.getImageUrl(),
 		};
 
 		return productView;

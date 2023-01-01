@@ -1,13 +1,15 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import cors from 'cors';
+
 import express, { NextFunction, Request, Response } from 'express';
 import 'express-async-errors';
-import path from 'path';
 import { router } from './routes/index.routes';
 import { createConnection } from './database/data-source';
 import { HandleErrors } from './shared/errors/HandleErrors';
+import upload from './config/upload';
 
-createConnection('database_coffee_delivery');
+createConnection();
 
 const app = express();
 const port = '3838';
@@ -15,7 +17,8 @@ const port = '3838';
 app.use(express.json());
 
 // a função express.static('caminho da pasta dos arquivos') permite que o express passe arquivos armazenados localmente para o navegador ter acesso.
-app.use('/files', express.static('./tmp/'));
+app.use('/avatar', express.static(`${upload.tmpFolder}/avatar`));
+app.use('/productsImages', express.static(`${upload.tmpFolder}/productsImages`));
 
 app.use(cors());
 app.use(router);

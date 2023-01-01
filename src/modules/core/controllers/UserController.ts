@@ -32,6 +32,36 @@ class UserController {
 		}
 	}
 
+	async handleUpdateUser(request: Request, response: Response): Promise<Response> {
+		const { id } = request.params;
+		const { name, email, phone_number } = request.body;
+
+		const userUseCase = container.resolve(UserUseCase);
+		await userUseCase.executeUpdateUser({ id, name, email, phone_number });
+
+		return response.json({ message: 'User sucess updated!' });
+	}
+
+	async handleUpdateUserAvatar(request: Request, response: Response): Promise<Response> {
+		const { id } = request.user;
+		const avatar_file = request.file.filename;
+
+		const userUseCase = container.resolve(UserUseCase);
+
+		try {
+			const updated = await userUseCase.executeUpdateUseravatar(id, avatar_file);
+
+			if (updated.affected === 0) {
+				return response.status(404).json({ error: 'Nenhuma atualização foi realizada' });
+			}
+
+			return response.status(200).json({ message: 'User avatar sucess updated!', content: avatar_file });
+		} catch (error) {
+			console.log(error);
+			return response.status(400).json({ error: 'Erro ao tentar inserir avatar' });
+		}
+	}
+
 	async handleListAllUsers(request: Request, response: Response): Promise<Response> {
 		const userUseCase = container.resolve(UserUseCase);
 
@@ -53,29 +83,9 @@ class UserController {
 
 			return response.json(user);
 		} catch (error) {
+			console.log(error);
 			response.status(404).json({ message: 'Erro ao tentar listar usuário' });
 		}
-	}
-
-	async handleUpdateUser(request: Request, response: Response): Promise<Response> {
-		const { id } = request.params;
-		const { name, email, phone_number } = request.body;
-
-		const userUseCase = container.resolve(UserUseCase);
-		await userUseCase.executeUpdateUser({ id, name, email, phone_number });
-
-		return response.json({ message: 'User sucess updated!' });
-	}
-
-	async handleUpdateUserAvatar(request: Request, response: Response): Promise<Response> {
-		const { id } = request.params;
-		const avatar_file = request.file.filename;
-		console.log(avatar_file);
-
-		const userUseCase = container.resolve(UserUseCase);
-		await userUseCase.executeUpdateUseravatar(id, avatar_file);
-
-		return response.status(204).json({ message: 'User avatar sucess updated!' });
 	}
 }
 

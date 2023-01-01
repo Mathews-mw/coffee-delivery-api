@@ -9,15 +9,21 @@ import { IMailProvider } from '../../../shared/providers/IMailProvider';
 import { IUsersTokensRepository } from '../../repositories/IUsersTokensRepository';
 import { UserRepository } from '../../repositories/implementations/UsersRepository';
 import { DateProvider } from '../../../shared/providers/implementations/DateProvider';
-import { MailProvider } from '../../../shared/providers/implementations/MailProvider';
+import { MailProvider } from '../../../shared/providers/implementations/EtherealMailProvider';
 import { UsersTokensRepository } from '../../repositories/implementations/UsersTokensRepository';
+import { SESMailProvider } from '../../../shared/providers/implementations/SESMailProvider';
+
+const mailProvider = {
+	ses: SESMailProvider,
+	ethereal: MailProvider,
+};
 
 @injectable()
 class ForgottenUserPasswordUseCase {
 	constructor(
 		@inject(DateProvider)
 		private dateProvider: IDateProvider,
-		@inject(MailProvider)
+		@inject(mailProvider[process.env.MAIL_PROVIDER])
 		private mailProvider: IMailProvider,
 		@inject(UserRepository)
 		private userRepository: IUserRepository,

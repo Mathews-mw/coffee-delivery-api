@@ -14,17 +14,18 @@ services:
     volumes:
       - pgdata:/data/postgres
 
-  app:
-    build: .
-    container_name: coffee-delivery-api
-    ports:
-      - 3838:3838
-    volumes:
-      - .:/usr/app
-    links:
-      - database_coffee_delivery
-    depends_on:
-      - database_coffee_delivery
+  # app:
+  #   build: .
+  #   container_name: coffee-delivery-api
+  #   ports:
+  #     - 3838:3838
+  #   volumes:
+  #     - .:/usr/app
+  #   links:
+  #     - database_coffee_delivery
+  #   depends_on:
+  #     - database_coffee_delivery
+
 volumes:
   pgdata:
     driver: local

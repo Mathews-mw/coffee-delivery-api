@@ -1,6 +1,7 @@
 import { Repository, UpdateResult } from 'typeorm';
-import AppDataSource from '../../../database/data-source';
+
 import { Product } from '../../entities/Product';
+import AppDataSource from '../../../database/data-source';
 import { ICreateProductDTO, IProductRepository, IUpdateProductDTO } from '../IProductRepository';
 
 class ProductsRepository implements IProductRepository {
@@ -45,20 +46,19 @@ class ProductsRepository implements IProductRepository {
 		return updateProduct;
 	}
 
-  async editImage(ID: number, image_name: string): Promise<UpdateResult> {
-
+	async editImage(ID: number, image_name: string): Promise<UpdateResult> {
 		const updateImageProduct = await this.repository
 			.createQueryBuilder()
 			.update(Product)
 			.set({
-        image_name: image_name,
+				image_name: image_name,
 				updated_at: new Date(),
 			})
 			.where('id = :id', { id: ID })
 			.execute();
 
 		return updateImageProduct;
-  }
+	}
 
 	async delete(id: number): Promise<void> {
 		await this.repository.createQueryBuilder().delete().from(Product).where('id = :id', { id: id }).execute();

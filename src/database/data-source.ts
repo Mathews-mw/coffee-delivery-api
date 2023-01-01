@@ -8,6 +8,8 @@ import { Order } from '../modules/entities/Order';
 import { Product } from '../modules/entities/Product';
 import { Checkout } from '../modules/entities/Checkout';
 import { UserTokens } from '../modules/entities/UserTokens';
+import { Permission } from '../modules/entities/Permission';
+import { UserPermissions } from '../modules/entities/UserPermissions';
 
 const AppDataSource = new DataSource({
 	type: 'postgres',
@@ -18,13 +20,15 @@ const AppDataSource = new DataSource({
 	database: 'coffee_delivery',
 	synchronize: false,
 	logging: false,
-	entities: [User, Product, Tag, Order, Checkout, User, UserTokens],
-	migrations: ['./src/database/migrations/*.ts'],
+	entities: [User, Product, Tag, Order, Checkout, User, UserTokens, Permission, UserPermissions],
+	migrations: ['./src/database/migrations/*.ts', './src/database/migrations/seeds/*.ts'],
 	subscribers: [],
 });
 
-export function createConnection(host = 'database'): Promise<DataSource> {
-	return AppDataSource.setOptions({ host }).initialize();
+export function createConnection(): Promise<DataSource> {
+	return AppDataSource.setOptions({
+		database: 'coffee_delivery',
+	}).initialize();
 }
 
 export default AppDataSource;

@@ -13,12 +13,12 @@ class MailProvider implements IMailProvider {
 			.createTestAccount()
 			.then((account) => {
 				const transporter = nodemailer.createTransport({
-					host: 'smtp.gmail.com',
-					port: 465,
-					secure: true,
+					host: account.smtp.host,
+					port: account.smtp.port,
+					secure: account.smtp.secure,
 					auth: {
-						user: 'mathews.mw@gmail.com',
-						pass: 'zoedoiofepvktpcz',
+						user: account.user,
+						pass: account.pass,
 					},
 				});
 				this.client = transporter;
@@ -33,14 +33,11 @@ class MailProvider implements IMailProvider {
 
 		const templateHTML = templateParse(variables); // Por fim, handlebars vai pegar essa compilação e ler as variáveis contidas para gerar o HTML
 
-		console.log('client: ', this.client);
-
 		const message = await this.client.sendMail({
 			to,
-			from: 'Rentx <noreply@rentx.com.br',
+			from: 'Coffe-Delivery <noreply@coffeeDelivery.com',
 			subject,
 			html: templateHTML,
-			text: 'Olá, teste de envio de e-mail',
 		});
 
 		console.log('Message sent: %s', message.messageId);

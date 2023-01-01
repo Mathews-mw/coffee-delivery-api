@@ -19,17 +19,8 @@ export async function ensureAuthenticate(request: Request, response: Response, n
 	const [, token] = authHeader.split(' ');
 
 	try {
-		const decoded = verify(token, auth.secret_refresh_token) as IPayload;
+		const decoded = verify(token, auth.secret_token) as IPayload;
 		const { sub: user_id } = decoded;
-
-		const userRepository = new UserRepository();
-
-		const idFormatted = Number(user_id);
-		const user = await usersTokensRepository.findByUserIdAndRefreshToken(idFormatted, token);
-
-		if (!user) {
-			return response.status(401).json({ message: 'User does not exists!' });
-		}
 
 		request.user = {
 			id: user_id,

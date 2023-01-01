@@ -1,10 +1,15 @@
-import { deleteFile } from '../../../utils/fileManager';
-import chalk from 'chalk';
-import { User } from '../../entities/User';
-import { IUserRepository } from '../../repositories/IUserRepository';
+import { UpdateResult } from 'typeorm';
 import { injectable, inject } from 'tsyringe';
-import { UserRepository } from '../../repositories/implementations/UsersRepository';
+
+import { User } from '../../entities/User';
 import { HandleErrors } from '../../../shared/errors/HandleErrors';
+import { IUserRepository } from '../../repositories/IUserRepository';
+import { IStorageProvider } from '../../../shared/providers/IStorageProvider';
+import { UserRepository } from '../../repositories/implementations/UsersRepository';
+import { IUserPermissionsRepository } from '../../repositories/IUserPermissionsRepository';
+import { S3StorageProvider } from '../../../shared/providers/implementations/S3StorageProvider';
+import { LocalStorageProvider } from '../../../shared/providers/implementations/LocalStorageProvider';
+import { UserPermissionsRepository } from '../../repositories/implementations/UserPermissionsRepository';
 
 interface IRequest {
 	name: string;
@@ -23,11 +28,25 @@ interface IUpdateRequest {
 	phone_number: string;
 }
 
+interface IUserResponse {
+	user: User;
+	avatar_url: string;
+}
+
+const diskStorage = {
+	local: LocalStorageProvider,
+	s3: S3StorageProvider,
+};
+
 @injectable()
 class UserUseCase {
 	constructor(
 		@inject(UserRepository)
-		private userRepository: IUserRepository
+		private userRepository: IUserRepository,
+		@inject(UserPermissionsRepository)
+		private userPermissionsRepository: IUserPermissionsRepository,
+		@inject(diskStorage[process.env.disk])
+		private storageProvider: IStorageProvider
 	) {}
 
 	async executeCreate(data: IRequest): Promise<void> {
@@ -49,6 +68,39 @@ class UserUseCase {
 		});
 	}
 
+	async executeUpdateUser({ id, name, email, phone_number }: IUpdateRequest): Promise<void> {
+		const idNumber = Number(id);
+		const user = await this.userRepository.findByID(idNumber);
+
+		if (!user) {
+			console.log('erro!');
+			throw new Error('User not found!');
+		}
+
+		await this.userRepository.updateUser({ id, name, email, phone_number });
+
+		return;
+	}
+
+	async executeUpdateUseravatar(id: string, avatar_file: string): Promise<UpdateResult> {
+		const idNumber = Number(id);
+		const user = await this.userRepository.findByID(idNumber);
+
+		if (!user) {
+			throw new Error('User not found!');
+		}
+
+		if (user.avatar) {
+			await this.storageProvider.delete(user.avatar, 'avatar');
+		}
+
+		await this.storageProvider.save(avatar_file, 'avatar');
+
+		const updateUserAvatar = await this.userRepository.UpdateUserAvatar(idNumber, avatar_file);
+
+		return updateUserAvatar;
+	}
+
 	async executeListAllUsers(): Promise<User[]> {
 		try {
 			const allUsers = await this.userRepository.getAllUsers();
@@ -59,45 +111,25 @@ class UserUseCase {
 		}
 	}
 
-	async executeFindByCPF(cpf: string): Promise<User> {
-		const user = this.userRepository.findByCPF(cpf);
+	async executeFindByCPF(cpf: string): Promise<IUserResponse> {
+		let user = await this.userRepository.findByCPF(cpf);
 
-		if (!user) {
-			throw new HandleErrors('User not found!');
+		const userAvatarUrl = user.avatar_url();
+
+		const userPermissions = await this.userPermissionsRepository.indexByUserId(user.id);
+
+		console.log('userPermissions: ', user.avatar_url());
+
+		if (userPermissions) {
+			user.permissions = userPermissions.map((permission) => {
+				return permission.permission;
+			});
 		}
 
-		return user;
-	}
-
-	async executeUpdateUser({ id, name, email, phone_number }: IUpdateRequest): Promise<void> {
-		const idNumber = Number(id);
-		const user = await this.userRepository.findByID(idNumber);
-
-		if (!user) {
-			console.log('erro!');
-			throw new Error(chalk.bgYellow('User not found!'));
-		}
-
-		await this.userRepository.updateUser({ id, name, email, phone_number });
-
-		return;
-	}
-
-	async executeUpdateUseravatar(id: string, avatar_file: string): Promise<void> {
-		const idNumber = Number(id);
-		const user = await this.userRepository.findByID(idNumber);
-
-		if (!user) {
-			throw new Error(chalk.bgYellow('User not found!'));
-		}
-
-		if (user.avatar) {
-			await deleteFile(`./tmp/avatar/${user.avatar}`);
-		}
-
-		await this.userRepository.UpdateUserAvatar(user, avatar_file);
-
-		return;
+		return {
+			user,
+			avatar_url: userAvatarUrl,
+		};
 	}
 }
 

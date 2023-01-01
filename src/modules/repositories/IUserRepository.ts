@@ -1,3 +1,4 @@
+import { UpdateResult } from 'typeorm';
 import { User } from '../entities/User';
 
 export interface ICreateUserDTO {
@@ -17,5 +18,5 @@ export interface IUserRepository {
 	findByEmail(email: string): Promise<User>;
 	getAllUsers(): Promise<User[]>;
 	updateUser({ id, name, email, phone_number }): Promise<void>;
-	UpdateUserAvatar(recivedUser: User, avatar_file: string): Promise<void>;
+	UpdateUserAvatar(id: number, avatar_file: string): Promise<UpdateResult>;
 }

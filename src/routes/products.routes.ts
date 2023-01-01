@@ -1,15 +1,14 @@
 import { Router } from 'express';
-
 import multer from 'multer';
-import uploadConfig from '../config/upload';
 
+import uploadConfig from '../config/upload';
 import { ensureAuthenticate } from '../middleware/ensureAuthenticate';
 import { TagController } from '../modules/core/controllers/TagController';
 import { ProductController } from '../modules/core/controllers/ProductController';
 
 const productsRoutes = Router();
 
-const uploadProductImage = multer(uploadConfig.upload('./tmp/productsImages'));
+const uploadProductImage = multer(uploadConfig);
 
 const tagController = new TagController();
 const productsController = new ProductController();
