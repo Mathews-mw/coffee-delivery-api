@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 
 import { DataSource } from 'typeorm';
 
@@ -11,62 +12,23 @@ import { UserTokens } from '../modules/entities/UserTokens';
 import { Permission } from '../modules/entities/Permission';
 import { UserPermissions } from '../modules/entities/UserPermissions';
 
-interface IEnvVariables {
-	host: string;
-	port: number;
-	username: string;
-	password: string;
-	database: string;
-	migrations: string;
-	seeds: string;
-}
-
-function getAcessKeys(EnvVarMode: string) {
-	switch (EnvVarMode) {
-		case 'development':
-			return {
-				host: `${process.env.DB_DEV_HOST}`,
-				port: Number(process.env.DB_DEV_PORT),
-				username: `${process.env.DB_DEV_USERNAME}`,
-				password: `${process.env.DB_DEV_PASSWORD}`,
-				database: `${process.env.DB_DEV_DATABASE}`,
-				migrations: `${process.env.APP_DEV_MIGRATIONS_PATH}`,
-				seeds: `${process.env.APP_DEV_SEEDS_PATH}`,
-			};
-		case 'production':
-			return {
-				host: `${process.env.DB_PROD_HOST}`,
-				port: Number(process.env.DB_PROD_PORT),
-				username: `${process.env.DB_PROD_USERNAME}`,
-				password: `${process.env.DB_PROD_PASSWORD}`,
-				database: `${process.env.DB_PROD_DATABASE}`,
-				migrations: `${process.env.APP_PROD_MIGRATIONS_PATH}`,
-				seeds: `${process.env.APP_PROD_SEEDS_PATH}`,
-			};
-		default:
-			return null;
-	}
-}
-
-const setVariables = getAcessKeys(process.env.NODE_ENV);
-
 const AppDataSource = new DataSource({
 	type: 'postgres',
-	host: setVariables.host,
-	port: setVariables.port,
-	username: setVariables.username,
-	password: setVariables.password,
-	database: setVariables.database,
+	host: process.env.NODE_ENV === 'development' ? `${process.env.TYPEORM_DEV_HOST}` : `${process.env.TYPEORM_PROD_HOST}`,
+	port: process.env.NODE_ENV === 'development' ? Number(process.env.TYPEORM_DEV_PORT) : Number(process.env.TYPEORM_PROD_PORT),
+	username: process.env.NODE_ENV === 'development' ? `${process.env.TYPEORM_DEV_USERNAME}` : `${process.env.TYPEORM_PROD_USERNAME}`,
+	password: process.env.NODE_ENV === 'development' ? `${process.env.TYPEORM_DEV_PASSWORD}` : `${process.env.TYPEORM_PROD_PASSWORD}`,
+	database: process.env.NODE_ENV === 'development' ? `${process.env.TYPEORM_DEV_DATABASE}` : `${process.env.TYPEORM_PROD_DATABASE}`,
 	synchronize: false,
 	logging: false,
 	entities: [User, Product, Tag, Order, Checkout, UserTokens, Permission, UserPermissions],
-	migrations: [`${setVariables.migrations}`, `${setVariables.seeds}`],
+	migrations: process.env.NODE_ENV === 'development' ? [`${process.env.TYPEORM_DEV_MIGRATIONS}`] : [`${process.env.TYPEORM_PROD_MIGRATIONS}`],
 	subscribers: [],
 });
 
 export function createConnection(): Promise<DataSource> {
 	return AppDataSource.setOptions({
-		database: setVariables.database,
+		database: process.env.NODE_ENV === 'development' ? `${process.env.DB_DEV_DATABASE}` : `${process.env.DB_PROD_DATABASE}`,
 	}).initialize();
 }
 

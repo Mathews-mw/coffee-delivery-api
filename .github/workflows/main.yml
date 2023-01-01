@@ -32,3 +32,16 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: '., !node_modules'
           target: '~/coffee-delivery/coffee-delivery-api'
+
+      - name: Update API
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/coffee-delivery/coffee-delivery-api
+            yarn
+            ./node_modules/.bin/typeorm migration:run -d dist/database/data-source.js
+            pm2 restart coffee-delivery-api
