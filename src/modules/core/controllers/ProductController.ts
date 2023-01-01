@@ -116,11 +116,16 @@ class ProductController {
 		try {
 			const idFormatted = Number(ID);
 			const product = await productUseCase.executeFindByID(idFormatted);
+			console.log('controller: ', product);
+
+			if (!product) {
+				return response.status(404).json({ error: 'Nunhum produto foi encontrado' });
+			}
 
 			return response.json(product);
 		} catch (error) {
 			console.log(error);
-			return response.status(400).json({ message: 'Erro ao tentar listar produto! A requisição tá caindo aqui...' });
+			return response.status(400).json({ message: 'Erro ao tentar listar produto!' });
 		}
 	}
 }

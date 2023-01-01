@@ -32,7 +32,9 @@ class User {
 	confirm_password: string;
 
 	@Column()
-	avatar: string;
+	avatar?: string;
+
+	avatar_url?: string;
 
 	@Column()
 	isAdmin: boolean;
@@ -45,8 +47,7 @@ class User {
 
 	permissions: IPermission[][];
 
-	@Expose({ name: 'avatar_url' })
-	avatar_url(): string {
+	getAvatarUrl(): string {
 		switch (process.env.disk) {
 			case 'local':
 				return `${process.env.APP_API_URL}/avatar/${this.avatar}`;

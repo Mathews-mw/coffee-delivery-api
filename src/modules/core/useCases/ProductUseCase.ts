@@ -181,21 +181,26 @@ class ProductUseCase {
 	}
 
 	async executeFindByID(id: number): Promise<IProductView> {
-		const productById = await this.productRopistory.findByID(id);
-		const tags = await this.tagRepository.listTagsByRef(productById.uuid_ref_tag);
+		let tags: Tag[];
+		let productView: IProductView;
 
-		const productView = {
-			id: productById.id,
-			product_name: productById.product_name,
-			price: productById.price,
-			description: productById.description,
-			tags: tags,
-			image_name: productById.image_name,
-			uuid_ref_tag: productById.uuid_ref_tag,
-			created_at: productById.created_at,
-			updated_at: productById.updated_at,
-			image_url: productById.getImageUrl(),
-		};
+		const productById = await this.productRopistory.findByID(id);
+
+		if (productById) {
+			tags = await this.tagRepository.listTagsByRef(productById.uuid_ref_tag);
+			productView = {
+				id: productById.id,
+				product_name: productById.product_name,
+				price: productById.price,
+				description: productById.description,
+				tags: tags,
+				image_name: productById.image_name,
+				uuid_ref_tag: productById.uuid_ref_tag,
+				created_at: productById.created_at,
+				updated_at: productById.updated_at,
+				image_url: productById.getImageUrl(),
+			};
+		}
 
 		return productView;
 	}

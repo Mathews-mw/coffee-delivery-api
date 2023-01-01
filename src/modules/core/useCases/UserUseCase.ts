@@ -2,6 +2,7 @@ import { UpdateResult } from 'typeorm';
 import { injectable, inject } from 'tsyringe';
 
 import { User } from '../../entities/User';
+import { UserPermissions } from '../../entities/UserPermissions';
 import { HandleErrors } from '../../../shared/errors/HandleErrors';
 import { IUserRepository } from '../../repositories/IUserRepository';
 import { IStorageProvider } from '../../../shared/providers/IStorageProvider';
@@ -18,7 +19,6 @@ interface IRequest {
 	cpf: string;
 	password: string;
 	confirm_password: string;
-	avatar: string;
 }
 
 interface IUpdateRequest {
@@ -26,11 +26,6 @@ interface IUpdateRequest {
 	name: string;
 	email: string;
 	phone_number: string;
-}
-
-interface IUserResponse {
-	user: User;
-	avatar_url: string;
 }
 
 const diskStorage = {
@@ -50,12 +45,7 @@ class UserUseCase {
 	) {}
 
 	async executeCreate(data: IRequest): Promise<void> {
-		const { name, email, phone_number, cpf, password, confirm_password, avatar } = data;
-
-		const userAlreadyExists = await this.userRepository.findByCPF(cpf);
-		if (userAlreadyExists) {
-			throw new Error('User Already exists!');
-		}
+		const { name, email, phone_number, cpf, password, confirm_password } = data;
 
 		await this.userRepository.create({
 			name,
@@ -64,31 +54,20 @@ class UserUseCase {
 			cpf,
 			password,
 			confirm_password,
-			avatar,
 		});
 	}
 
-	async executeUpdateUser({ id, name, email, phone_number }: IUpdateRequest): Promise<void> {
+	async executeUpdateUser({ id, name, email, phone_number }: IUpdateRequest): Promise<UpdateResult> {
 		const idNumber = Number(id);
-		const user = await this.userRepository.findByID(idNumber);
 
-		if (!user) {
-			console.log('erro!');
-			throw new Error('User not found!');
-		}
+		const updateUser = await this.userRepository.updateUser({ id: idNumber, name, email, phone_number });
 
-		await this.userRepository.updateUser({ id, name, email, phone_number });
-
-		return;
+		return updateUser;
 	}
 
 	async executeUpdateUseravatar(id: string, avatar_file: string): Promise<UpdateResult> {
 		const idNumber = Number(id);
 		const user = await this.userRepository.findByID(idNumber);
-
-		if (!user) {
-			throw new Error('User not found!');
-		}
 
 		if (user.avatar) {
 			await this.storageProvider.delete(user.avatar, 'avatar');
@@ -111,14 +90,17 @@ class UserUseCase {
 		}
 	}
 
-	async executeFindByCPF(cpf: string): Promise<IUserResponse> {
-		let user = await this.userRepository.findByCPF(cpf);
+	async executeFindByCPF(cpf: string): Promise<User> {
+		let userAvatarUrl: string;
+		let userPermissions: UserPermissions[];
 
-		const userAvatarUrl = user.avatar_url();
+		const user = await this.userRepository.findByCPF(cpf);
 
-		const userPermissions = await this.userPermissionsRepository.indexByUserId(user.id);
+		if (user) {
+			userAvatarUrl = user.getAvatarUrl();
 
-		console.log('userPermissions: ', user.avatar_url());
+			userPermissions = await this.userPermissionsRepository.indexByUserId(user.id);
+		}
 
 		if (userPermissions) {
 			user.permissions = userPermissions.map((permission) => {
@@ -126,10 +108,11 @@ class UserUseCase {
 			});
 		}
 
-		return {
-			user,
-			avatar_url: userAvatarUrl,
-		};
+		if (userAvatarUrl) {
+			user.avatar_url = userAvatarUrl;
+		}
+
+		return user;
 	}
 }
 

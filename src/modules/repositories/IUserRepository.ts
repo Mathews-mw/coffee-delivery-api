@@ -8,7 +8,6 @@ export interface ICreateUserDTO {
 	phone_number: string;
 	password: string;
 	confirm_password: string;
-	avatar?: string;
 }
 
 export interface IUserRepository {
@@ -17,6 +16,6 @@ export interface IUserRepository {
 	findByID(id: number): Promise<User>;
 	findByEmail(email: string): Promise<User>;
 	getAllUsers(): Promise<User[]>;
-	updateUser({ id, name, email, phone_number }): Promise<void>;
+	updateUser({ id, name, email, phone_number }): Promise<UpdateResult>;
 	UpdateUserAvatar(id: number, avatar_file: string): Promise<UpdateResult>;
 }

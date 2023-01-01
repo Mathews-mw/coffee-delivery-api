@@ -6,11 +6,17 @@ import { readImageFile } from '../../../utils/fileManager';
 
 class UserController {
 	async handleCreate(request: Request, response: Response): Promise<Response> {
-		const { name, email, phone_number, cpf, password, confirm_password, avatar } = request.body;
-
+		const { name, email, phone_number, cpf, password, confirm_password } = request.body;
+		console.log(request.body);
 		const userUseCase = container.resolve(UserUseCase);
 
 		try {
+			const alredyExists = await userUseCase.executeFindByCPF(cpf);
+
+			if (alredyExists) {
+				return response.status(404).json({ message: 'Usuário já cadastrado!' });
+			}
+
 			await userUseCase.executeCreate({
 				name,
 				email,
@@ -18,15 +24,10 @@ class UserController {
 				cpf,
 				password,
 				confirm_password,
-				avatar,
 			});
 
 			return response.status(201).json({ message: 'Usuário criado com sucesso!' });
 		} catch (error) {
-			const alredyExists = await userUseCase.executeFindByCPF(cpf);
-			if (alredyExists) {
-				return response.status(404).json({ message: 'Usuário já cadastrado!' });
-			}
 			console.log(error);
 			return response.status(500).json({ message: 'Erro ao tentar criar usuário!' });
 		}
@@ -37,9 +38,18 @@ class UserController {
 		const { name, email, phone_number } = request.body;
 
 		const userUseCase = container.resolve(UserUseCase);
-		await userUseCase.executeUpdateUser({ id, name, email, phone_number });
 
-		return response.json({ message: 'User sucess updated!' });
+		try {
+			const updateUser = await userUseCase.executeUpdateUser({ id, name, email, phone_number });
+
+			if (updateUser.affected === 0) {
+				return response.status(404).json({ error: 'Nenhum usuário foi atualizado' });
+			}
+
+			return response.json({ message: 'User sucess updated!' });
+		} catch (error) {
+			console.log(error);
+		}
 	}
 
 	async handleUpdateUserAvatar(request: Request, response: Response): Promise<Response> {
@@ -74,6 +84,7 @@ class UserController {
 		const { cpf } = request.params;
 
 		const userUseCase = container.resolve(UserUseCase);
+
 		try {
 			const user = await userUseCase.executeFindByCPF(cpf);
 

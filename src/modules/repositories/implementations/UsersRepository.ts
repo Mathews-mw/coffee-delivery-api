@@ -14,7 +14,7 @@ class UserRepository implements IUserRepository {
 	}
 
 	async create(data: ICreateUserDTO): Promise<void> {
-		const { name, phone_number, email, cpf, password, confirm_password, avatar } = data;
+		const { name, phone_number, email, cpf, password, confirm_password } = data;
 
 		const hashPassword = await hash(password, 8);
 		const hashConfirmPassword = await hash(confirm_password, 8);
@@ -26,7 +26,7 @@ class UserRepository implements IUserRepository {
 			cpf,
 			password: hashPassword,
 			confirm_password: hashConfirmPassword,
-			avatar,
+
 			isAdmin: false,
 			created_at: new Date(),
 			updated_at: new Date(),
@@ -44,10 +44,6 @@ class UserRepository implements IUserRepository {
 	async findByCPF(cpf: string): Promise<User> {
 		const user = await this.repository.findOneBy({ cpf });
 
-		const avatarUrl = user.avatar_url();
-
-		const { name, email, phone_number } = user;
-
 		return user;
 	}
 
@@ -63,8 +59,8 @@ class UserRepository implements IUserRepository {
 		return user;
 	}
 
-	async updateUser({ id, name, email, phone_number }): Promise<void> {
-		await this.repository
+	async updateUser({ id, name, email, phone_number }): Promise<UpdateResult> {
+		const updateUser = await this.repository
 			.createQueryBuilder()
 			.update(User)
 			.set({
@@ -77,7 +73,7 @@ class UserRepository implements IUserRepository {
 			.execute()
 			.finally();
 
-		return;
+		return updateUser;
 	}
 
 	async UpdateUserAvatar(id: number, avatar_file: string): Promise<UpdateResult> {
