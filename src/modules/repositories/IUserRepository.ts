@@ -12,10 +12,11 @@ export interface ICreateUserDTO {
 
 export interface IUserRepository {
 	create(data: ICreateUserDTO): Promise<void>;
+	updateUser({ id, name, email, phone_number }): Promise<UpdateResult>;
+	UpdateUserAvatar(id: number, avatar_file: string): Promise<UpdateResult>;
+	makeAdmin(cpf: string): Promise<UpdateResult>;
 	findByCPF(cpf: string): Promise<User>;
 	findByID(id: number): Promise<User>;
 	findByEmail(email: string): Promise<User>;
 	getAllUsers(): Promise<User[]>;
-	updateUser({ id, name, email, phone_number }): Promise<UpdateResult>;
-	UpdateUserAvatar(id: number, avatar_file: string): Promise<UpdateResult>;
 }

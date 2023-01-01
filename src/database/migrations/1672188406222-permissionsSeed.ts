@@ -1,5 +1,5 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import { Permission } from '../../../modules/entities/Permission';
+import { Permission } from '../../modules/entities/Permission';
 
 export class permissionsSeed1672188406222 implements MigrationInterface {
 	public async up(queryRunner: QueryRunner): Promise<void> {

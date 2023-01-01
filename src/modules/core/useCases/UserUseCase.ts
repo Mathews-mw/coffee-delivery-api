@@ -80,6 +80,18 @@ class UserUseCase {
 		return updateUserAvatar;
 	}
 
+	async executeMakeAdmin(cpf: string): Promise<UpdateResult> {
+		let becomeAdmin: UpdateResult;
+
+		const user = await this.userRepository.findByCPF(cpf);
+
+		if (user) {
+			becomeAdmin = await this.userRepository.makeAdmin(user.cpf);
+		}
+
+		return becomeAdmin;
+	}
+
 	async executeListAllUsers(): Promise<User[]> {
 		try {
 			const allUsers = await this.userRepository.getAllUsers();

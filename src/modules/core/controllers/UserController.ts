@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
+import { UsersPermissionsUseCase } from '../useCases/UsersPermissionsUseCase';
 import { UserUseCase } from '../useCases/UserUseCase';
-import { HandleErrors } from '../../../shared/errors/HandleErrors';
-import { readImageFile } from '../../../utils/fileManager';
 
 class UserController {
 	async handleCreate(request: Request, response: Response): Promise<Response> {
 		const { name, email, phone_number, cpf, password, confirm_password } = request.body;
-		console.log(request.body);
+
 		const userUseCase = container.resolve(UserUseCase);
 
 		try {
@@ -69,6 +68,36 @@ class UserController {
 		} catch (error) {
 			console.log(error);
 			return response.status(400).json({ error: 'Erro ao tentar inserir avatar' });
+		}
+	}
+
+	async handleMakeAdmin(request: Request, response: Response): Promise<Response> {
+		const { id } = request.user;
+		const { cpf } = request.body;
+
+		const userUseCase = container.resolve(UserUseCase);
+		const userPermissionsUseCase = container.resolve(UsersPermissionsUseCase);
+
+		try {
+			const userPermissions = await userPermissionsUseCase.executeIndexByUserId(Number(id));
+			const hasPermissions = userPermissions.find((userPermission: any) => {
+				return userPermission.permission.value === 'permissions-modify';
+			});
+
+			if (!hasPermissions) {
+				return response.status(401).json({ error: 'Você não tem permissão para essa ação' });
+			}
+
+			const updatedToAdmin = await userUseCase.executeMakeAdmin(cpf);
+
+			if (updatedToAdmin.affected === 0) {
+				return response.status(404).json({ error: 'Nenhuma atribuição feita' });
+			}
+
+			return response.status(200).json({ message: 'Permissão de admin atribuída com sucesso' });
+		} catch (error) {
+			console.log(error);
+			return response.status(400).json({ error: 'Erro ao tentar atribuir admin' });
 		}
 	}
 

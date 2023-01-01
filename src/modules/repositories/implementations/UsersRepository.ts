@@ -26,37 +26,12 @@ class UserRepository implements IUserRepository {
 			cpf,
 			password: hashPassword,
 			confirm_password: hashConfirmPassword,
-
 			isAdmin: false,
 			created_at: new Date(),
 			updated_at: new Date(),
 		});
 
 		await this.repository.save(newUser);
-	}
-
-	async getAllUsers(): Promise<User[]> {
-		const users = await this.repository.find();
-
-		return users;
-	}
-
-	async findByCPF(cpf: string): Promise<User> {
-		const user = await this.repository.findOneBy({ cpf });
-
-		return user;
-	}
-
-	async findByID(id: number): Promise<User> {
-		const user = await this.repository.findOneBy({ id });
-
-		return user;
-	}
-
-	async findByEmail(email: string): Promise<User> {
-		const user = await this.repository.findOneBy({ email });
-
-		return user;
 	}
 
 	async updateUser({ id, name, email, phone_number }): Promise<UpdateResult> {
@@ -89,6 +64,44 @@ class UserRepository implements IUserRepository {
 			.finally();
 
 		return updateUserAvatar;
+	}
+
+	async makeAdmin(cpf: string): Promise<UpdateResult> {
+		const becomeAdmin = await this.repository
+			.createQueryBuilder()
+			.update(User)
+			.set({
+				isAdmin: true,
+			})
+			.where('cpf = :cpf', { cpf })
+			.execute()
+			.finally();
+
+		return becomeAdmin;
+	}
+
+	async getAllUsers(): Promise<User[]> {
+		const users = await this.repository.find();
+
+		return users;
+	}
+
+	async findByCPF(cpf: string): Promise<User> {
+		const user = await this.repository.findOneBy({ cpf });
+
+		return user;
+	}
+
+	async findByID(id: number): Promise<User> {
+		const user = await this.repository.findOneBy({ id });
+
+		return user;
+	}
+
+	async findByEmail(email: string): Promise<User> {
+		const user = await this.repository.findOneBy({ email });
+
+		return user;
 	}
 }
 
