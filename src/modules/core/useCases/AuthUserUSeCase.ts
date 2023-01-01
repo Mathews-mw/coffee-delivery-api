@@ -36,6 +36,7 @@ class AuthUserUseCase {
 
 	async execute({ email, password }: IRequest): Promise<IResponse> {
 		const user = await this.UserRepository.findByEmail(email);
+
 		const { secret_token, secret_refresh_token, expires_in_token, expires_in_refresh_token, expires_in_refresh_token_days } = auth;
 
 		if (!user) {
