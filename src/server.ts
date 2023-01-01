@@ -12,7 +12,7 @@ import upload from './config/upload';
 createConnection();
 
 const app = express();
-const port = '3838';
+const port = process.env.PORT || 3838;
 
 app.use(express.json());
 
