@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
+import auth from '../../../config/auth';
 import { RefreshTokenUseCase } from '../useCases/RefreshTokenUseCase';
 
 class RefreshTokenController {
@@ -11,10 +12,19 @@ class RefreshTokenController {
 
 			const refresh_token = await refreshTokenUseCase.executeCreate(token);
 
+			if (!refresh_token) {
+				return response.status(401).json({ error: 'Token Invalid' });
+			}
+
 			return response.status(201).json(refresh_token);
 		} catch (error) {
-			console.log(error);
-			return response.status(400).json({ message: 'Erro ao tentar validar refresh token' });
+			const { expiredAt } = error;
+
+			if (expiredAt) {
+				return response.status(401).json({ error: auth.expires_token_message_error });
+			}
+
+			return response.status(400).json({ error: 'Erro ao tentar validar refresh token' });
 		}
 	}
 }

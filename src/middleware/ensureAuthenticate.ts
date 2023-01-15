@@ -10,10 +10,9 @@ interface IPayload {
 
 export async function ensureAuthenticate(request: Request, response: Response, next: NextFunction) {
 	const authHeader = request.headers.authorization;
-	const usersTokensRepository = new UsersTokensRepository();
 
 	if (!authHeader) {
-		return response.status(401).json({ message: 'Token Invalid!' });
+		return response.status(401).json({ message: 'Token Invalid' });
 	}
 
 	const [, token] = authHeader.split(' ');
@@ -28,6 +27,10 @@ export async function ensureAuthenticate(request: Request, response: Response, n
 
 		next();
 	} catch (error) {
-		return response.status(401).json({ message: 'Token Invalid!' });
+		const { expiredAt } = error;
+		if (expiredAt) {
+			return response.status(401).json({ error: auth.expires_token_message_error });
+		}
+		return response.status(401).json({ error: 'Token Invalid' });
 	}
 }

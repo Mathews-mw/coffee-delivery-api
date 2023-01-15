@@ -84,9 +84,9 @@ class UserController {
 				return userPermission.permission.value === 'permissions-modify';
 			});
 
-			/* if (!hasPermissions) {
+			if (!hasPermissions) {
 				return response.status(401).json({ error: 'Você não tem permissão para essa ação' });
-			} */
+			}
 
 			const updatedToAdmin = await userUseCase.executeMakeAdmin(cpf);
 
@@ -106,6 +106,11 @@ class UserController {
 
 		const users = await userUseCase.executeListAllUsers();
 
+		users.forEach((user) => {
+			delete user.password;
+			delete user.confirm_password;
+		});
+
 		return response.json(users);
 	}
 
@@ -120,6 +125,9 @@ class UserController {
 			if (!user) {
 				return response.json({ message: 'nenhum usuário encontrado' });
 			}
+
+			delete user.password;
+			delete user.confirm_password;
 
 			return response.json(user);
 		} catch (error) {

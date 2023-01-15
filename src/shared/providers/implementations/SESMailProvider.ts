@@ -28,7 +28,7 @@ class SESMailProvider implements IMailProvider {
 
 		await this.client.sendMail({
 			to,
-			from: 'Coffee-Delivery <coffeedelivery@zohomail.com',
+			from: 'Coffee-Delivery <coffeedelivery@zohomail.com>',
 			subject,
 			html: templateHTML,
 		});

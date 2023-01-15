@@ -67,7 +67,6 @@ class ProductController {
 
 	async handleDelete(request: Request, response: Response): Promise<Response> {
 		const { ID } = request.params;
-		console.log(ID);
 
 		const productUseCase = container.resolve(ProductUseCase);
 
@@ -75,7 +74,7 @@ class ProductController {
 			await productUseCase.executeDelete(ID);
 			return response.status(200).json({ message: 'Produto deletado' });
 		} catch (error) {
-			console.log(error);
+			console.log('handleDelete: ', error);
 			return response.status(400).json({ message: 'Erro ao tentar deletar' });
 		}
 	}

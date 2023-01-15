@@ -20,7 +20,7 @@ const port = process.env.PORT || 3838;
 
 app.use(express.json());
 
-app.use(rateLimiter);
+// app.use(rateLimiter);
 
 Sentry.init({
 	dsn: process.env.SENTRY_DSN,

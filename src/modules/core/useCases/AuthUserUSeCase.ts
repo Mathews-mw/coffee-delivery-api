@@ -1,13 +1,17 @@
-import { inject, injectable } from 'tsyringe';
-import { sign } from 'jsonwebtoken';
 import { compare } from 'bcryptjs';
-import { IUserRepository } from '../../repositories/IUserRepository';
-import { UserRepository } from '../../repositories/implementations/UsersRepository';
-import { IUsersTokensRepository } from '../../repositories/IUsersTokensRepository';
-import { UsersTokensRepository } from '../../repositories/implementations/UsersTokensRepository';
-import { IDateProvider } from '../../../shared/providers/IDateProvider';
-import { DateProvider } from '../../../shared/providers/implementations/DateProvider';
+import { sign } from 'jsonwebtoken';
+import { inject, injectable } from 'tsyringe';
+
 import auth from '../../../config/auth';
+import { UserPermissions } from '../../entities/UserPermissions';
+import { IUserRepository } from '../../repositories/IUserRepository';
+import { IDateProvider } from '../../../shared/providers/IDateProvider';
+import { IUsersTokensRepository } from '../../repositories/IUsersTokensRepository';
+import { UserRepository } from '../../repositories/implementations/UsersRepository';
+import { DateProvider } from '../../../shared/providers/implementations/DateProvider';
+import { IUserPermissionsRepository } from '../../repositories/IUserPermissionsRepository';
+import { UsersTokensRepository } from '../../repositories/implementations/UsersTokensRepository';
+import { UserPermissionsRepository } from '../../repositories/implementations/UserPermissionsRepository';
 
 interface IRequest {
 	email: string;
@@ -31,11 +35,15 @@ class AuthUserUseCase {
 		@inject(UsersTokensRepository)
 		private usersTokensRepository: IUsersTokensRepository,
 		@inject(DateProvider)
-		private dateProvider: IDateProvider
+		private dateProvider: IDateProvider,
+		@inject(UserPermissionsRepository)
+		private userPermissionsRepository: IUserPermissionsRepository
 	) {}
 
 	async execute({ email, password }: IRequest): Promise<IResponse> {
 		const user = await this.UserRepository.findByEmail(email);
+		let userAvatarUrl: string;
+		let userPermissions: UserPermissions[];
 
 		const { secret_token, secret_refresh_token, expires_in_token, expires_in_refresh_token, expires_in_refresh_token_days } = auth;
 
@@ -69,6 +77,22 @@ class AuthUserUseCase {
 
 		delete user.password;
 		delete user.confirm_password;
+
+		if (user) {
+			userAvatarUrl = user.getAvatarUrl();
+
+			userPermissions = await this.userPermissionsRepository.indexByUserId(user.id);
+		}
+
+		if (userPermissions) {
+			user.permissions = userPermissions.map((permission) => {
+				return permission.permission;
+			});
+		}
+
+		if (userAvatarUrl) {
+			user.avatar_url = userAvatarUrl;
+		}
 
 		const returnToken: IResponse = {
 			token: token,

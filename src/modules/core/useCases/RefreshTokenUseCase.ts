@@ -37,7 +37,7 @@ class RefreshTokenUseCase {
 		const userTokens = await this.usersTokensRepository.findByUserIdAndRefreshToken(user_id_formatted, token);
 
 		if (!userTokens) {
-			throw new HandleErrors('Refresh token does not exists!');
+			throw new HandleErrors('Refresh token does not exists');
 		}
 
 		await this.usersTokensRepository.deleteById(userTokens.id);
