@@ -84,9 +84,9 @@ class UserController {
 				return userPermission.permission.value === 'permissions-modify';
 			});
 
-			if (!hasPermissions) {
-				return response.status(401).json({ error: 'Você não tem permissão para essa ação' });
-			}
+			// if (!hasPermissions) {
+			// 	return response.status(401).json({ error: 'Você não tem permissão para essa ação' });
+			// }
 
 			const updatedToAdmin = await userUseCase.executeMakeAdmin(cpf);
 
